@@ -34,12 +34,13 @@ model User {
   chatSessions   ChatSession[]
 
   // Relations - Social
-  posts      Post[]
-  comments   Comment[]
-  likes      Like[]
-  followers  Follow[]    @relation("FollowingUser")
-  following  Follow[]    @relation("FollowedUser")
-  savedPosts SavedPost[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  followers     Follow[]       @relation("FollowingUser")
+  following     Follow[]       @relation("FollowedUser")
+  savedPosts    SavedPost[]
+  notifications Notification[]
 
   @@index([clerkId])
   @@index([username])
@@ -277,6 +278,23 @@ model PostVerification {
   @@unique([postId, doctorId])
   @@index([postId])
   @@index([doctorId])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  type      String // CHAT_REQUEST, DIAGNOSTIC_READY, POST_LIKED, NEW_FOLLOWER, COMMENT
+  title     String
+  message   String    @db.Text
+  data      Json      @default("{}")
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
 }
 
 enum SenderRole {
