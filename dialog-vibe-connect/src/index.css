@@ -1,0 +1,65 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 21 32 43;
+    --foreground: 255 255 255;
+    --card: 25 39 52;
+    --card-foreground: 255 255 255;
+    --popover: 25 39 52;
+    --popover-foreground: 255 255 255;
+    --primary: 29 161 242;
+    --primary-foreground: 255 255 255;
+    --secondary: 56 68 77;
+    --secondary-foreground: 255 255 255;
+    --muted: 56 68 77;
+    --muted-foreground: 136 153 166;
+    --accent: 29 161 242;
+    --accent-foreground: 255 255 255;
+    --destructive: 224 36 94;
+    --destructive-foreground: 255 255 255;
+    --border: 56 68 77;
+    --input: 56 68 77;
+    --ring: 29 161 242;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-twitter-dark text-twitter-text antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+}
+
+@layer components {
+  .dialog-content {
+    @apply fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-twitter-card p-6 shadow-lg duration-200 sm:rounded-lg md:w-full;
+  }
+  
+  .dialog-overlay {
+    @apply fixed inset-0 z-40 bg-black/50 backdrop-blur-sm;
+  }
+  
+  .dialog-title {
+    @apply text-lg font-semibold text-twitter-text;
+  }
+  
+  .dialog-description {
+    @apply text-sm text-twitter-textSecondary;
+  }
+  
+  .option-card {
+    @apply relative flex cursor-pointer select-none items-center rounded-lg border border-twitter-border bg-twitter-card p-4 text-twitter-text transition-all hover:border-twitter-accent focus:outline-none focus:ring-2 focus:ring-twitter-accent focus:ring-offset-2;
+  }
+  
+  .session-card {
+    @apply flex flex-col gap-4 rounded-lg border border-twitter-border bg-twitter-card p-6 transition-all hover:border-twitter-accent;
+  }
+}
