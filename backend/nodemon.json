@@ -1,0 +1,7 @@
+{
+    "watch": [
+        "src"
+    ],
+    "ext": "ts",
+    "exec": "bun run ts-node  ts-node/esm src/index.ts"
+}

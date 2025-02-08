@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2"
+  },
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc",
+    "start": "node ./dist/index.js",
+    "prisma": "npx prisma"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "@types/express": "^5.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "prisma": "^6.3.1",
+    "socket.io": "^4.8.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
+  }
+}
