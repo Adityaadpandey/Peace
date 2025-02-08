@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { createServer } from 'http';
+import { requireAdmin, requireAuth } from './middleware/auth';
 import { adminRoute } from './router/admin';
 import { chatRoute } from './router/chat';
 import { diagnosticRoute } from './router/diagnostic';
@@ -28,19 +29,21 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Health check route - unprotected
 app.get('/', (req, res) => {
-  res.send('Hello! Welcome to the Medical Chat API');
+  res.send('Medical Chat API is running');
 });
 
-// API Routes
-app.use('/api/user', userRoute);
-app.use('/api/doctor', doctorRoute);
-app.use('/api/chat', chatRoute);
-app.use('/api/diagnostic', diagnosticRoute);
-app.use('/api/social', socialRoute);
-app.use('/api/admin', adminRoute);
-app.use('/api/notifications', notificationRouter);
+// Protected API Routes - require authentication
+app.use('/api/user', requireAuth, userRoute);
+app.use('/api/doctor', requireAuth, doctorRoute);
+app.use('/api/chat', requireAuth, chatRoute);
+app.use('/api/diagnostic', requireAuth, diagnosticRoute);
+app.use('/api/social', requireAuth, socialRoute);
+app.use('/api/notifications', requireAuth, notificationRouter);
+
+// Admin routes - require admin role
+app.use('/api/admin', requireAuth, requireAdmin, adminRoute);
 
 const PORT = process.env.PORT || 3000;
 

@@ -1,14 +1,47 @@
 # Medical Chat API Documentation
 
+## Authentication Setup
+
+This API uses Clerk for authentication. Before running the application, you need to set up Clerk:
+
+1. Create a Clerk account at https://clerk.com
+2. Create a new application in Clerk dashboard
+3. Get your API keys from Clerk dashboard
+4. Set up environment variables:
+
+```env
+CLERK_SECRET_KEY=your_secret_key
+CLERK_PUBLISHABLE_KEY=your_publishable_key
+```
+
+### User Roles
+
+The application supports three user roles:
+- Regular User
+- Doctor
+- Admin
+
+To set a user's role, use Clerk's dashboard to add publicMetadata:
+```json
+{
+  "role": "admin" // or "doctor"
+}
+```
+
 ## Base URL
 ```
 http://localhost:3000/api
 ```
 
 ## Authentication
-All endpoints require authentication using Clerk. Include the authentication token in the Authorization header.
 
-## Endpoints
+All API endpoints (except the health check) require authentication. Include the Clerk session token in the Authorization header:
+
+```http
+Authorization: Bearer your_clerk_session_token
+```
+
+## Protected Routes
 
 ### Doctor Management
 
@@ -228,7 +261,7 @@ DELETE /social/follow/:userId
 ```
 **Use Case:** Stop following a user
 
-### Admin/Moderation
+### Admin Routes (Requires Admin Role)
 
 #### 1. List Users
 ```http
@@ -289,14 +322,6 @@ PUT /notifications/:id/read
 - Marks notification as read
 - Updates read timestamp
 
-## Real-time Features
-
-The API uses Socket.IO for real-time features:
-1. Instant messaging in chat sessions
-2. Real-time notification delivery
-3. Online status updates for doctors
-4. Chat typing indicators
-
 ## Error Handling
 
 All endpoints follow a consistent error response format:
@@ -309,6 +334,32 @@ All endpoints follow a consistent error response format:
 Common HTTP status codes:
 - 200: Success
 - 400: Bad Request
-- 401: Unauthorized
+- 401: Unauthorized (Invalid or missing token)
+- 403: Forbidden (Insufficient permissions)
 - 404: Not Found
 - 500: Internal Server Error
+
+## Development Setup
+
+1. Install dependencies:
+```bash
+bun install
+```
+
+2. Set up environment variables:
+```env
+DATABASE_URL="postgresql://..."
+CLERK_SECRET_KEY="..."
+CLERK_PUBLISHABLE_KEY="..."
+FRONTEND_URL="http://localhost:3000"
+```
+
+3. Run database migrations:
+```bash
+bun prisma generate
+bun prisma migrate dev
+```
+
+4. Start the development server:
+```bash
+bun dev
