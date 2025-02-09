@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from 'next/navigation';
 import { useState } from "react";
 
+
 export function DoctorRegistrationForm({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -29,11 +32,6 @@ export function DoctorRegistrationForm({ open, onOpenChange }: { open: boolean; 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // In a real application, you would:
-            // 1. Upload the file to your storage service
-            // 2. Get back a URL
-            // 3. Set that URL as the avatar
-            // For now, we'll just store the file name
             setFormData(prev => ({ ...prev, avatar: file.name }));
         }
     };
@@ -50,6 +48,7 @@ export function DoctorRegistrationForm({ open, onOpenChange }: { open: boolean; 
             await createDoc({
                 docdata: formData
             });
+            router.push("/doc-dashboard")
             onOpenChange(false);  // Close dialog after successful submission
         } catch (error) {
             console.error('Failed to create doctor profile:', error);

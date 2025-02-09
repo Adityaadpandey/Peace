@@ -119,11 +119,21 @@ export async function checkUserInDB(clerkId: string) {
             where: { clerkId }
         });
 
+        return !!user;  // Returns true if user exists, false otherwise
+    } catch (error) {
+        console.error("DB Error:", error);
+        return false;
+    }
+}
+export async function checkDocInDB(clerkId: string) {
+    try {
+
+
         const user2 = await db.doctor.findUnique({
             where: { clerkId }
         });
 
-        return !!user||user2;  // Returns true if user exists, false otherwise
+        return !!user2;  // Returns true if user exists, false otherwise
     } catch (error) {
         console.error("DB Error:", error);
         return false;

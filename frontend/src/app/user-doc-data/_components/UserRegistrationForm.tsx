@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from 'next/navigation';
 import { useState } from "react";
 
 export function UserRegistrationForm({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -42,6 +44,7 @@ export function UserRegistrationForm({ open, onOpenChange }: { open: boolean; on
             setFormData((prev) => ({
                 ...prev,
                 [category]: {
+                    // @ts-except-ignore
                     ...prev[category as keyof typeof prev],
                     [subfield]: value,
                 },
@@ -58,12 +61,14 @@ export function UserRegistrationForm({ open, onOpenChange }: { open: boolean; on
         setLoading(true);
         try {
             await createUser({
+                // @ts-except-ignore
                 userdata: {
                     ...formData,
                     age: parseInt(formData.age, 10),
                     isAnonymous: false,
                 }
             });
+            router.push("/user-dashboard");
             onOpenChange(false);
         } catch (error) {
             console.error('Failed to create user:', error);

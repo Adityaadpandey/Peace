@@ -1,6 +1,6 @@
 'use client';
 
-import { checkUserInDB } from '@/actions/user-data'; // Import the server action
+import { checkDocInDB, checkUserInDB } from '@/actions/user-data'; // Import the server action
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from "react";
@@ -21,9 +21,14 @@ const UserData = () => {
 
             try {
                 const userExists = await checkUserInDB(user.id);
+                const docExist = await checkDocInDB(user.id);
                 if (userExists) {
-                    router.push('/home');  // Redirect to the desired page
-                } else {
+                    router.push('/user-dashboard');  // Redirect to the desired page
+                }
+                else if (docExist) {
+                    router.push('/doc-dashboard');  // Redirect to the desired page
+                }
+                else {
                     setLoading(false);  // Show registration forms if user doesn't exist
                 }
             } catch (error) {
