@@ -91,14 +91,6 @@ function CommentThread({ comment, depth = 0 }: { comment: Comment; depth?: numbe
                 <ArrowBigUp className="h-4 w-4" />
               </Button>
               <span className="text-xs min-w-[1.5rem] text-center">{votes}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`h-6 w-6 ${voteStatus === 'down' ? 'text-blue-500' : ''}`}
-                onClick={() => handleVote('down')}
-              >
-                <ArrowBigDown className="h-4 w-4" />
-              </Button>
             </div>
             <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
               Reply
@@ -176,14 +168,6 @@ export function PostCard({ title, content, author, timestamp, votes: initialVote
               <ArrowBigUp className="h-5 w-5" />
             </Button>
             <span className="min-w-[2rem] text-center">{votes}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-8 w-8 ${voteStatus === 'down' ? 'text-blue-500' : ''}`}
-              onClick={() => handleVote('down')}
-            >
-              <ArrowBigDown className="h-5 w-5" />
-            </Button>
           </div>
           <Button 
             variant="ghost" 
