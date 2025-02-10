@@ -105,23 +105,20 @@ model MedicalHistory {
 }
 
 model ChatSession {
-  id        String    @id @default(uuid())
-  startedAt DateTime  @default(now())
-  endedAt   DateTime?
+  id           String    @id @default(uuid())
+  startedAt    DateTime? // Changed to optional
+  endedAt      DateTime?
+  messageCount Int       @default(0)
 
-  // Counter Fields
-  messageCount Int @default(0)
-
-  userId     String
-  doctorId   String
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  doctor     Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  messages   Message[]
-  diagnostic DiagnosticReport?
+  userId           String
+  doctorId         String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctor           Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  messages         Message[]
+  DiagnosticReport DiagnosticReport?
 
   @@index([userId])
   @@index([doctorId])
-  @@index([startedAt])
 }
 
 model Message {
