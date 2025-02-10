@@ -1,24 +1,28 @@
+// hooks/useAvailableDoctors.ts
 import type { Doctor } from '@/types/chat';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useToast } from './use-toast';
 
 export function useAvailableDoctors() {
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [eventSource, setEventSource] = useState<EventSource | null>(null);
     const { toast } = useToast();
 
-    useEffect(() => {
-        let isSubscribed = true;
-        const eventSource = new EventSource('/api/doctor/available');
+    const connect = useCallback(() => {
+        if (eventSource) {
+            eventSource.close();
+        }
 
-        eventSource.onmessage = (event) => {
-            if (!isSubscribed) return;
+        const newEventSource = new EventSource('/api/doctor/available');
 
+        newEventSource.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 setDoctors(data);
                 setIsLoading(false);
+                setError(null);
             } catch (err) {
                 console.error('Error parsing doctors:', err);
                 setError('Failed to process available doctors');
@@ -26,27 +30,40 @@ export function useAvailableDoctors() {
             }
         };
 
-        eventSource.onerror = () => {
-            if (!isSubscribed) return;
-
-            setError('Connection error. Reconnecting...');
+        newEventSource.onerror = (event) => {
+            console.error('EventSource error:', event);
+            setError('Connection error. Attempting to reconnect...');
             setIsLoading(false);
 
-            // The browser will automatically try to reconnect
             toast({
                 title: 'Connection Error',
                 description: 'Reconnecting to available doctors stream...',
                 variant: 'destructive',
             });
+
+            // Close the errored connection
+            newEventSource.close();
+
+            // Attempt to reconnect after 5 seconds
+            setTimeout(() => {
+                connect();
+            }, 5000);
         };
 
-        return () => {
-            isSubscribed = false;
-            eventSource.close();
-        };
+        setEventSource(newEventSource);
     }, [toast]);
 
-    const requestChat = async (doctorId: string) => {
+    useEffect(() => {
+        connect();
+
+        return () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        };
+    }, [connect]);
+
+    const requestChat = async (doctorId: string): Promise<{ chatId: string }> => {
         try {
             const response = await fetch('/api/chat/request', {
                 method: 'POST',
@@ -57,7 +74,7 @@ export function useAvailableDoctors() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to send chat request');
+                throw new Error(`Failed to send chat request: ${response.statusText}`);
             }
 
             const data = await response.json();
@@ -72,24 +89,24 @@ export function useAvailableDoctors() {
             console.error('Error requesting chat:', error);
             toast({
                 title: 'Error',
-                description: 'Failed to send chat request',
+                description: 'Failed to send chat request. Please try again.',
                 variant: 'destructive',
             });
             throw error;
         }
     };
 
-    const reconnect = () => {
+    const reconnect = useCallback(() => {
         setError(null);
         setIsLoading(true);
-        // The useEffect will automatically reconnect
-    };
+        connect();
+    }, [connect]);
 
     return {
         doctors,
         isLoading,
         error,
         requestChat,
-        reconnect
+        reconnect,
     };
 }

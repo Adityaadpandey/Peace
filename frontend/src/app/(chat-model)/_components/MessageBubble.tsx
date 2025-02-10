@@ -8,16 +8,17 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble = ({ message, isUser = false, timestamp }: MessageBubbleProps) => {
+    console.log("Message", message, isUser, timestamp)
   return (
     <div
       className={cn(
-        "flex w-full animate-message-in opacity-0",
+        "flex z-[999] w-full animate-message-in ",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       <div
         className={cn(
-          "max-w-[90%] sm:max-w-[80%] rounded-2xl px-4 sm:px-6 py-2 sm:py-3 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
+          "max-w-[90%]  sm:max-w-[80%] rounded-2xl px-4 sm:px-6 py-2 sm:py-3 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
           isUser
             ? "bg-indigo-500/80 text-white backdrop-blur-lg"
             : "bg-white/10 text-white backdrop-blur-lg"

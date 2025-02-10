@@ -2,9 +2,10 @@
 'use client';
 
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@clerk/nextjs';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { Avatar3D } from '../../_components/Avatar3D';
 import { ChatInterface } from '../../_components/ChatInterface';
 
@@ -14,34 +15,74 @@ interface ChatSession {
     doctorId: string;
     startedAt: Date;
     messageCount: number;
+    user: {
+        id: string;
+        username: string;
+    };
+    doctor: {
+        id: string;
+        name: string;
+    };
 }
 
 const ChatPage = () => {
     const [isAvatarSpeaking, setIsAvatarSpeaking] = useState(false);
     const [session, setSession] = useState<ChatSession | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const isMobile = useIsMobile();
     const { user } = useUser();
     const params = useParams();
+    const router = useRouter();
+    const { toast } = useToast();
     const sessionId = params.sessionId as string;
 
-    useEffect(() => {
-        const fetchSession = async () => {
-            try {
-                const response = await fetch(`/api/chat/${sessionId}`);
-                const data = await response.json();
-                setSession(data);
-            } catch (error) {
-                console.error('Error fetching session:', error);
+    const fetchSession = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/chat/${sessionId}?init=true`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch session: ${response.statusText}`);
             }
-        };
+            const data = await response.json();
+            setSession(data);
+        } catch (error) {
+            console.error('Error fetching session:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to load chat session',
+                variant: 'destructive',
+            });
+            router.push('/'); // Redirect to home on error
+        } finally {
+            setIsLoading(false);
+        }
+    }, [sessionId, toast, router]);
 
+    useEffect(() => {
         if (sessionId) {
             fetchSession();
         }
-    }, [sessionId]);
+    }, [sessionId, fetchSession]);
 
-    if (!session || !user) {
-        return <div>Loading...</div>;
+    // Show loading state
+    if (isLoading || !user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#243949] via-[#517fa4] to-[#243949]">
+                <div className="bg-black/20 backdrop-blur-2xl p-8 rounded-3xl border border-white/20 shadow-2xl">
+                    <div className="animate-pulse text-white">Loading chat session...</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state if no session
+    if (!session) {
+        return (
+            <div className="min-h-screen flex items-center justify-center ">
+                <div className="bg-black/20 backdrop-blur-2xl p-8 rounded-3xl border border-white/20 shadow-2xl">
+                    <div className="">Session not found</div>
+                </div>
+            </div>
+        );
     }
 
     return (
