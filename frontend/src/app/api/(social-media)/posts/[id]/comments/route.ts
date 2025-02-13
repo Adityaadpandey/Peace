@@ -1,13 +1,29 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { db as prisma } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs/server";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Remove the await from params - it's already an object
     const { id } = await params;
-
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const userId = (
+      await prisma.user.findUnique({
+        where: { clerkId: user?.id },
+        select: { id: true },
+      })
+    )?.id;
     if (!id) {
-      return Response.json({ error: "Post ID is required", comments: [] }, { status: 400 });
+      return Response.json(
+        { error: "Post ID is required", comments: [] },
+        { status: 400 }
+      );
     }
 
     const comments = await prisma.comment.findMany({
@@ -72,6 +88,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const transformedComments = comments.map((comment) => {
       const baseLikes = Array.isArray(comment.likes) ? comment.likes : [];
       const baseReplies = Array.isArray(comment.replies) ? comment.replies : [];
+      
+      
 
       return {
         id: comment.id,
@@ -80,8 +98,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         updatedAt: comment.updatedAt,
         likesCount: comment.likesCount,
         repliesCount: comment.repliesCount,
+        hasLiked: comment.likes.some((like) => {
+          console.log(userId, like.userId, like.userId === userId);
+          return like.userId === userId
+        }),
         likes: baseLikes,
-        commenter: comment.doctor 
+        commenter: comment.doctor
           ? {
               type: "doctor" as const,
               name: comment.doctor.name,
@@ -91,7 +113,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             }
           : {
               type: "user" as const,
-              name: comment.user?.isAnonymous 
+              name: comment.user?.isAnonymous
                 ? "Anonymous User"
                 : comment.user?.username || "Unknown User",
               avatar: comment.user?.avatar,
@@ -121,14 +143,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         })),
       };
     });
-
-    console.log(comments)
-
-    return Response.json({ 
+    return Response.json({
       comments: transformedComments,
-      total: transformedComments.length 
+      total: transformedComments.length,
     });
-    
   } catch (error) {
     console.error("Error fetching comments:", error);
     return Response.json(

@@ -35,7 +35,7 @@ interface FormState {
   media: string[];
 }
 
-export function CreatePost() {
+export default function CreatePost() {
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState<FormState>({
     title: '',
@@ -97,10 +97,11 @@ export function CreatePost() {
       userId: user.id,
       media: form.media,
       };
+      console.log(payload);
+      
 
       if (!payload){
       throw new Error('Missing required fields');
-      return;
       }
 
       const response = await fetch('/api/add-post', {

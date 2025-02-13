@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { content, postId, parentId } = body;
+    const { content, postId, parentId, media } = body;
     console.log(content, postId, parentId);
     
     if (!content || !postId) {
@@ -53,27 +53,15 @@ export async function POST(request: Request) {
     // Create the comment/reply in a transaction
     
     const result = await prisma.$transaction(async (tx) => {
-        // Create the comment
-        console.log(user.id);
+      
       const comment = await tx.comment.create({
         data: {
           content,
           postId,
           userId: user.id,
-          ...(parentId ? { parentId } : {})
+          ...(parentId ? { parentId } : {}),
         },
-        // include: {
-        //   user: {
-        //     select: {
-        //       username: true,
-        //       avatar: true
-        //     }
-        //   }
-        // }
-      });
-      console.log('here2');
-      
-      // If this is a reply, increment the parent's reply count
+      });      
       if (parentId) {
         await tx.comment.update({
           where: { id: parentId },

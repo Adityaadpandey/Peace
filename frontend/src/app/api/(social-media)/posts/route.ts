@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         user: true,
         doctor: true,
         likes: true,
-        comments: true
+        comments: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -50,7 +50,8 @@ export async function GET(request: NextRequest) {
       createdAt: post.createdAt.toISOString(),
       likesCount: post.likes.length,
       commentsCount: post.comments.length,
-      hasLiked: post.likes.some(like => like.userId === userId)
+      hasLiked: post.likes.some(like => like.userId === userId),
+      media: post.media
     }));
 
     return NextResponse.json({
