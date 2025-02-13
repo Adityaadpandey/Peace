@@ -37,6 +37,7 @@ model User {
   posts         Post[]
   comments      Comment[]
   likes         Like[]
+  commentLikes  CommentLike[]
   followers     Follow[]       @relation("FollowingUser")
   following     Follow[]       @relation("FollowedUser")
   savedPosts    SavedPost[]
@@ -55,6 +56,7 @@ model Doctor {
   speciality  String?
   bio         String?  @db.Text
   avatar      String?
+  isVerified  Boolean  @default(false)
 
   // Counter Fields
   postsCount        Int @default(0)
@@ -154,7 +156,8 @@ model DiagnosticReport {
 
 model Post {
   id        String       @id @default(uuid())
-  content   String       @db.Text
+  title     String
+  content   String?       @db.Text
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   isPrivate Boolean      @default(false)
@@ -168,14 +171,14 @@ model Post {
   // Relations
   userId   String? // Optional if posted by doctor
   doctorId String? // Optional if posted by user
-  user     User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  doctor   Doctor? @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  user     User?   @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  doctor   Doctor? @relation(fields: [doctorId], references: [clerkId], onDelete: Cascade)
 
   comments      Comment[]
   likes         Like[]
   savedBy       SavedPost[]
   verifications PostVerification[]
-  media         PostMedia[]
+  media         String[]
 
   @@index([userId])
   @@index([doctorId])
@@ -188,29 +191,59 @@ model PostMedia {
   url    String
   type   MediaType
   postId String
-  post   Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([type])
 }
 
+// Update the Comment model to include likes and replies
 model Comment {
   id        String   @id @default(uuid())
   content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Counter Fields
+  likesCount Int @default(0)
+  repliesCount Int @default(0)
+
   postId   String
   userId   String? // Optional if commented by doctor
   doctorId String? // Optional if commented by user
+  
+  // New fields for nested replies
+  parentId String?  // ID of parent comment if this is a reply
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
 
   post   Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
   user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   doctor Doctor? @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  
+  // Add likes relation
+  likes CommentLike[]
 
   @@index([postId])
   @@index([userId])
   @@index([doctorId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+// New model for comment likes
+model CommentLike {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  commentId String
+  userId    String
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
   @@index([createdAt])
 }
 

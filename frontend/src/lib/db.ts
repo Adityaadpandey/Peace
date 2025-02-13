@@ -1,3 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 
-export const db = new PrismaClient();
+interface GlobalPrisma {
+  db?: PrismaClient;
+}
+
+const globalWithPrisma = global as typeof globalThis & GlobalPrisma;
+const db = globalWithPrisma.db || new PrismaClient();
+
+export {db};
