@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { PostCard } from '@/components/post-card';
 import { Navbar } from '@/components/navbar';
-import { CreatePost } from '@/components/create-post';
+import { CreatePost } from '@/app/social/create-post';
 
 interface Post {
   id: string;
