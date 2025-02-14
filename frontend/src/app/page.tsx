@@ -9,14 +9,15 @@ const orbitron = Orbitron({ subsets: ['latin'], weight: ['700'] });
 export default function Home() {
   function onLoad(spline: Application) {
     // spline.play();
-    spline.canvas.style.scale = '1.5';
+    spline.canvas.style.scale = '1.25';
   }
 
   return (
     <div>
       <main className='max-h-screen overflow-hidden'>
-        <Navbar className='fixed -z-10' />
+        <Navbar className='fixed z-10' />
         <Spline
+          className='-z-20 '
           onLoad={onLoad}
           scene="https://prod.spline.design/GGFqhs3CbugFAs4K/scene.splinecode"
         />
