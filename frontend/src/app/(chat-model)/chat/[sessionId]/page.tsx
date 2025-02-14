@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 // import { Avatar3D } from '../../_components/Avatar3D';
 import { ChatInterface } from "../../_components/ChatInterface";
+import { VRMViewer } from "../../_components/Avatar3D";
 
 interface ChatSession {
   id: string;
@@ -99,6 +100,8 @@ const ChatPage = () => {
                             isSpeaking={isAvatarSpeaking}
                             onFinishSpeaking={() => setIsAvatarSpeaking(false)}
                         /> */}
+
+            <VRMViewer modelPath="/model1.vrm" isSpeaking={isAvatarSpeaking} />
           </div>
           <div
             className={`${isMobile ? "h-[50vh]" : "h-[600px]"} rounded-3xl bg-black/20 backdrop-blur-2xl border border-white/20 shadow-2xl`}
